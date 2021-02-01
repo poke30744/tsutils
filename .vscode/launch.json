@@ -1,0 +1,80 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "ffmpeg.py info",
+            "type": "python",
+            "request": "launch",
+            "justMyCode": false,
+            "module": "tsutils.ffmpeg",
+            "args": [
+                "info",
+                "-i", "C:/Samples/1997.820-2386.809.ts"
+            ]
+        },
+        {
+            "name": "ffmpeg.py stream",
+            "type": "python",
+            "request": "launch",
+            "justMyCode": false,
+            "module": "tsutils.ffmpeg",
+            "args": [
+                "stream",
+                "-i", "C:/Samples/1997.820-2386.809.ts"
+            ]
+        },
+        {
+            "name": "ffmpeg.py area",
+            "type": "python",
+            "request": "launch",
+            "justMyCode": false,
+            "module": "tsutils.ffmpeg",
+            "args": [
+                "area",
+                "-i", "C:/Samples/1997.820-2386.809.ts",
+                "--area", "0.1", "0.1", "0.3", "0.3",
+                "--ss", "10",
+                "--to", "20"
+            ]
+        },
+        {
+            "name": "ffmpeg.py props",
+            "type": "python",
+            "request": "launch",
+            "justMyCode": false,
+            "module": "tsutils.ffmpeg",
+            "args": [
+                "props",
+                "-i", "C:/Samples/1997.820-2386.809.ts",
+                "--ss", "10",
+                "--to", "11"
+            ]
+        },
+        {
+            "name": "encode.py strip",
+            "type": "python",
+            "request": "launch",
+            "justMyCode": false,
+            "module": "tsutils.encode",
+            "args": [
+                "strip",
+                "-i", "C:/Samples/1997.820-2386.809.ts"
+            ]
+        },
+        {
+            "name": "encode.py strip (and repack)",
+            "type": "python",
+            "request": "launch",
+            "justMyCode": false,
+            "module": "tsutils.encode",
+            "args": [
+                "strip",
+                "-i", "C:/Samples/1997.820-2386.809.ts",
+                "--repack"
+            ]
+        }
+    ]
+}
