@@ -116,6 +116,30 @@ def ExtractStream(path, output=None, ss=0, to=999999, toWav=False, quiet=False):
     pipeObj.wait()
     return output
 
+# more accurate than ExtractStream
+def ExtractWav(path, output, ss=0, to=999999, quiet=False):
+    pipeObj = subprocess.Popen(
+        [
+            'ffmpeg', '-hide_banner',
+            '-ss', str(ss), '-to', str(to), '-i', path,
+            '-af',  'aresample=async=1',
+            '-f', 'wav', 
+            '-y', output
+        ]
+        , stderr=subprocess.PIPE, universal_newlines='\r', errors='ignore')
+    info = GetInfoFromLines(pipeObj.stderr)
+    with tqdm(total=info['duration'], unit='secs', disable=quiet) as pbar:
+        pbar.set_description('Extracting wav')
+        for line in pipeObj.stderr:
+            if 'time=' in line:
+                for item in line.split(' '):
+                    if item.startswith('time='):
+                        timeFields = item.replace('time=', '').split(':')
+                        time = float(timeFields[0]) * 3600 + float(timeFields[1]) * 60  + float(timeFields[2])
+                        pbar.update(time - pbar.n)
+        pbar.update(info['duration'] - pbar.n)
+    pipeObj.wait()
+
 def ExtractFrameProps(path, ss, to, nosad=False):
     CheckExtenralCommand('ffmpeg')
     path = Path(path)
