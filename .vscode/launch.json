@@ -75,6 +75,16 @@
                 "-i", "C:/Samples/1997.820-2386.809.ts",
                 "--repack"
             ]
+        },
+        {
+            "name": "subtitles.py -i",
+            "type": "python",
+            "request": "launch",
+            "justMyCode": false,
+            "module": "tsutils.subtitles",
+            "args": [
+                "-i", "C:/Samples/1997.820-2386.809.ts"
+            ]
         }
     ]
 }

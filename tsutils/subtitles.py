@@ -1,4 +1,4 @@
-import sys, subprocess
+import sys, subprocess, argparse
 from pathlib import Path
 import pysubs2
 from .common import TsFileNotFound, InvalidTsFormat, CheckExtenralCommand
@@ -20,7 +20,7 @@ def Extract(path):
                 "LEProc2.exe", # to emulate CP932 by Locale Emulator
                 caption2AssPath,
                 '-format', 'dual',
-                path
+                path.absolute()
             ], stdout=subprocess.PIPE)
         _ = pipeObj.stdout.readlines()
         pipeObj.wait()
@@ -34,3 +34,13 @@ def Extract(path):
                 subtitles = pysubs2.load(subtitlesPath, encoding='utf-8')
                 subtitles.save(subtitlesPath)
     return [ path for path in subtitlesPathes if path.exists() ]
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='Dump subtitles from TS file')
+    parser.add_argument('--quiet', '-q', action='store_true', help="don't output to the console")
+    parser.add_argument('--input', '-i', required=True, help='input mpegts path')
+    args = parser.parse_args()
+
+    files = Extract(args.input)
+    for path in files:
+        print(path.name)
