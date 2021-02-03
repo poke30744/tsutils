@@ -168,6 +168,7 @@ def EncodeTS(videoPath, preset, cropdetect, encoder, crf, outputPath=None, notag
     videoPath = Path(videoPath)
     if outputPath is None:
         outputPath = videoPath.with_suffix('.mp4') if notag else videoPath.with_suffix(f'.{preset}_{encoder}_crf{crf}.mp4')
+    outputPath = Path(outputPath)
     if outputPath.exists() and videoPath.stat().st_mtime == outputPath.stat().st_mtime:
         print(f'Skipping encoding {videoPath.name}', file=sys.stderr)
         return outputPath
