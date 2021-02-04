@@ -1,5 +1,6 @@
 import os, subprocess, json, unicodedata, time, argparse, re
 from pathlib import Path
+import yaml
 from .common import TsFileNotFound, InvalidTsFormat, CheckExtenralCommand
 
 def Dump(videoPath, quiet=False):
@@ -7,6 +8,8 @@ def Dump(videoPath, quiet=False):
         CheckExtenralCommand('mirakurun-epgdump.cmd')
     else:
         CheckExtenralCommand('mirakurun-epgdump')
+    with (Path(__file__).parent / 'channels.yml').open() as f:        
+        channels = yaml.load(f, Loader=yaml.FullLoader)
     videoPath = Path(videoPath)
     if not videoPath.is_file():
         raise TsFileNotFound(f'"{videoPath.name}" not found!')
@@ -45,8 +48,11 @@ def Dump(videoPath, quiet=False):
                 print(k, file=f)
                 print(info['extended'][k], file=f)
         print('', file=f)
+        for item in channels:
+            if item.get('serviceId') == info['serviceId']:
+                print(f'{item["name"]}', file=f)
+                break
         print(f"{time.strftime('%Y-%m-%d %H:%M (%a)', time.localtime(info['startAt'] / 1000))} ~ {round(info['duration'] / 1000 / 60)} mins", file=f)
-
     return epgPath, txtPath
 
 if __name__ == "__main__":
