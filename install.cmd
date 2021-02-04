@@ -1,1 +1,1 @@
-pip install dist\tsutils-0.0.2-py3-none-any.whl --force
+pip install dist\tsutils-0.0.2-py3-none-any.whl --no-deps --force-reinstall
