@@ -70,7 +70,7 @@ def GetInfo(path):
         raise InvalidTsFormat(f'"{path.name}" is invalid!')
     return info
 
-def ExtractStream(path, output=None, ss=0, to=999999, toWav=False, quiet=False):
+def ExtractStream(path, output=None, ss=0, to=999999, videoTracks=None, audioTracks=None, toWav=False, quiet=False):
     CheckExtenralCommand('ffmpeg')
     path = Path(path)
     if not path.is_file():
@@ -85,19 +85,26 @@ def ExtractStream(path, output=None, ss=0, to=999999, toWav=False, quiet=False):
     args = [
             'ffmpeg', '-hide_banner', '-y',
             '-ss', str(ss), '-to', str(to), '-i', path,
-            '-c:v', 'copy'
             ]
-    # to sync corrputed sound tracks with the actual video length
-    if toWav:
-        args += [ '-af',  'aresample=async=1' ]
     
-    # copy the video track
-    args += [ '-map', '0:v:0', '-c:v', 'copy', output / 'video_0.ts' ]
+    # copy video tracks
+    if videoTracks is None:
+        videoTracks = [ 0 ]
+    for i in videoTracks:
+        args += [  '-map', f'0:v:{i}', '-c:v', 'copy', output / f'video_{i}.ts' ]
 
     # copy audio tracks or decode to WAV
     extName = 'wav' if toWav else 'aac'
-    for i in range(info['soundTracks']):
-        args += [ '-map', f'0:a:{i}', output / f'audio_{i}.{extName}' ]
+    if audioTracks is None:
+        audioTracks =  list(range(info['soundTracks']))
+    for i in audioTracks:
+        args += [ '-map', f'0:a:{i}' ]
+        if toWav:
+            # to sync corrputed sound tracks with the actual video length
+            args += [ '-af',  'aresample=async=1', '-f', 'wav' ]
+        else:
+            args += [ '-c:a', 'copy' ]
+        args += [ output / f'audio_{i}.{extName}' ]
 
     pipeObj = subprocess.Popen(args, stderr=subprocess.PIPE, universal_newlines='\r', errors='ignore')
     info = GetInfoFromLines(pipeObj.stderr)
@@ -115,30 +122,6 @@ def ExtractStream(path, output=None, ss=0, to=999999, toWav=False, quiet=False):
         pbar.update(info['duration'] - pbar.n)
     pipeObj.wait()
     return output
-
-# more accurate than ExtractStream
-def ExtractWav(path, output, ss=0, to=999999, quiet=False):
-    pipeObj = subprocess.Popen(
-        [
-            'ffmpeg', '-hide_banner',
-            '-ss', str(ss), '-to', str(to), '-i', path,
-            '-af',  'aresample=async=1',
-            '-f', 'wav', 
-            '-y', output
-        ]
-        , stderr=subprocess.PIPE, universal_newlines='\r', errors='ignore')
-    info = GetInfoFromLines(pipeObj.stderr)
-    with tqdm(total=info['duration'], unit='secs', disable=quiet) as pbar:
-        pbar.set_description('Extracting wav')
-        for line in pipeObj.stderr:
-            if 'time=' in line:
-                for item in line.split(' '):
-                    if item.startswith('time='):
-                        timeFields = item.replace('time=', '').split(':')
-                        time = float(timeFields[0]) * 3600 + float(timeFields[1]) * 60  + float(timeFields[2])
-                        pbar.update(time - pbar.n)
-        pbar.update(info['duration'] - pbar.n)
-    pipeObj.wait()
 
 def ExtractFrameProps(path, ss, to, nosad=False):
     CheckExtenralCommand('ffmpeg')
@@ -263,6 +246,9 @@ if __name__ == "__main__":
     subparser = subparsers.add_parser('stream', help='extract video and audio streams from the mpegts file')
     subparser.add_argument('--input', '-i', required=True, help='input mpegts path')
     subparser.add_argument('--output', '-o', help='output folder path')
+    subparser.add_argument('--wav', action='store_true', help='convert audio tracks to WAV')
+    subparser.add_argument('--videotracks', default=None, nargs='*', type=int, help='video tracks number')
+    subparser.add_argument('--audiotracks', default=None, nargs='*', type=int, help='audio tracks number')
 
     subparser = subparsers.add_parser('area', help='extract video area as pictures')
     subparser.add_argument('--input', '-i', required=True, help='input mpegts path')
@@ -283,7 +269,7 @@ if __name__ == "__main__":
         info = GetInfo(path=args.input)
         print("info:", info)
     elif args.command == 'stream':
-        ExtractStream(path=args.input, toWav=True)
+        ExtractStream(path=args.input, videoTracks=args.videotracks, audioTracks=args.audiotracks, toWav=args.wav)
     elif args.command == 'area':
         ExtractArea(path=args.input, area=args.area, folder=args.output, ss=args.ss, to=args.to, fps=args.fps)
     elif args.command == 'props':

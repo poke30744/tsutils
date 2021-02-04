@@ -91,7 +91,8 @@ def StripTS(videoPath, outputPath=None, audioLanguages=None, nomap=False, quiet=
     args = [
         'ffmpeg', '-hide_banner', '-y',
         '-i', str(videoPath),
-        '-c', 'copy'
+        '-c:v', 'copy',
+        '-af',  'aresample=async=1',
     ]
     if not nomap:
         args += [ '-map', '0:v', '-map', '0:a', '-ignore_unknown' ]

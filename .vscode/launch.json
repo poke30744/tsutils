@@ -23,6 +23,9 @@
             "module": "tsutils.ffmpeg",
             "args": [
                 "stream",
+                "--videotracks",
+                "--audiotracks", "1",
+                "--wav",
                 "-i", "C:/Samples/1997.820-2386.809.ts"
             ]
         },

@@ -2,13 +2,13 @@ import sys, tempfile, argparse
 from pathlib import Path
 from pydub import AudioSegment
 from pydub.silence import detect_silence
-from .ffmpeg import ExtractWav
+from .ffmpeg import ExtractStream
 from .common import FormatTimestamp
 
 def DetectSilence(path, ss=0, to=999999, min_silence_len=800, silence_thresh=-80, quiet=False):
     with tempfile.TemporaryDirectory(prefix='logoNet_wav_') as tmpLogoFolder:
-        audioFilename = Path(tmpLogoFolder) / Path(Path(path).stem + '.wav')
-        ExtractWav(path, audioFilename, ss, to, quiet=quiet)
+        streamsFolder = ExtractStream(path=path, output=tmpLogoFolder, ss=ss, to=to, toWav=True, videoTracks=[], audioTracks=[0], quiet=quiet)
+        audioFilename = streamsFolder / 'audio_0.wav'
         if not quiet:
             print(f'Detect silence (min_silence_len: {min_silence_len},  silence_thresh: {silence_thresh})...', file=sys.stderr)
         sound = AudioSegment.from_wav(audioFilename).set_channels(1)
