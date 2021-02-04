@@ -13,6 +13,14 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/pypa/sampleproject",
     packages=setuptools.find_packages(),
+    install_requires=[
+        'pydub',
+        'numpy',
+        'tqdm',
+        'Pillow',
+        'pyyaml',
+        'pysubs2'
+    ],
     package_data={'': ['channels.yml']},
     include_package_data=True,
     classifiers=[
