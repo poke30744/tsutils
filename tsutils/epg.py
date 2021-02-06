@@ -52,6 +52,7 @@ def Dump(videoPath, quiet=False):
             if item.get('serviceId') == info['serviceId']:
                 print(f'{item["name"]}', file=f)
                 break
+        print(f'serviceId: {info["serviceId"]}', file=f)
         print(f"{time.strftime('%Y-%m-%d %H:%M (%a)', time.localtime(info['startAt'] / 1000))} ~ {round(info['duration'] / 1000 / 60)} mins", file=f)
     return epgPath, txtPath
 

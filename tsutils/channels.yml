@@ -28,6 +28,10 @@
   channel: '25'
   serviceId: 1040
 
+- name: '日テレ２'
+  type: 'GR'
+  serviceId: 1041
+
 - name: 'ＮＨＫＥテレ１東京'
   type: 'GR'
   channel: '26'
