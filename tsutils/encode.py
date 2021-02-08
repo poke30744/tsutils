@@ -93,6 +93,7 @@ def StripTS(videoPath, outputPath=None, audioLanguages=None, nomap=False, quiet=
         '-i', str(videoPath),
         '-c:v', 'copy',
         '-af',  'aresample=async=1',
+        '-c:a', 'aac',
     ]
     if not nomap:
         args += [ '-map', '0:v', '-map', '0:a', '-ignore_unknown' ]
@@ -211,7 +212,9 @@ def EncodeTS(videoPath, preset, cropdetect, encoder, crf, outputPath=None, notag
         '-i', str(videoPath),
         '-vf', videoFilter,
     ] + videoCodec + [
-        #'-c:a', 'copy', '-bsf:a', 'aac_adtstoasc',
+        #https://stackoverflow.com/questions/49686244/ffmpeg-too-many-packets-buffered-for-output-stream-01
+        #'-max_muxing_queue_size', '1024',
+        '-c:a', 'copy', '-bsf:a', 'aac_adtstoasc',
         '-map', '0:v', '-map', '0:a', '-ignore_unknown',
         str(outputPath)
     ]
