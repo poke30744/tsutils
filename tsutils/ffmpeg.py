@@ -258,8 +258,8 @@ if __name__ == "__main__":
     subparser.add_argument('--input', '-i', required=True, help='input mpegts path')
     subparser.add_argument('--output', '-o', help='output folder path')
     subparser.add_argument('--area', default=[0.0, 0.0, 1.0, 1.0], nargs=4, type=float, help='the area to extract')
-    subparser.add_argument('--ss', type=float, default=999999, help='from (seconds)')
-    subparser.add_argument('--to', type=float, default=0, help='to (seconds)')
+    subparser.add_argument('--ss', type=float, default=0, help='from (seconds)')
+    subparser.add_argument('--to', type=float, default=999999, help='to (seconds)')
     subparser.add_argument('--fps', default='1/1', help='fps like 1/1')
 
     subparser = subparsers.add_parser('props', help='extract frame properties')
