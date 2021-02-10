@@ -5,9 +5,13 @@ import numpy as np
 from PIL import Image
 from .common import TsFileNotFound, InvalidTsFormat, CheckExtenralCommand
 
-def GetInfoFromLines(lines):
+def GetInfoFromLines(lines, suffix=None):
     duration = 0
-    programs = {}
+    if suffix == '.mp4':
+        pid = 0
+        programs = { 0 : { 'soundTracks' : 0 } }
+    else:
+        programs = {}
     for line in lines:
         if 'Program ' in line:
             pid = line
@@ -64,7 +68,7 @@ def GetInfo(path):
         stderr=subprocess.PIPE,
         universal_newlines=True,
         errors='ignore')
-    info = GetInfoFromLines(pipeObj.stderr)
+    info = GetInfoFromLines(pipeObj.stderr, path.suffix)
     pipeObj.wait()
     if info is None:
         raise InvalidTsFormat(f'"{path.name}" is invalid!')

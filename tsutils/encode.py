@@ -4,6 +4,7 @@ import numpy as np
 from tqdm import tqdm
 from PIL import Image
 from .ffmpeg import GetInfo, GetInfoFromLines, ExtractArea, ExtractStream
+from .common import EncodingError
 
 def FindVideoBox(path, ss=None, to=None, quiet=False):
     info = GetInfo(path)
@@ -77,6 +78,11 @@ def GetAudioLanguagesByName(name):
     else:
         audioLanguages = ['jpn']
     return audioLanguages
+
+def CheckEncodingOutput(inputInfo, outputPath):
+    outputInfo = GetInfo(outputPath)
+    if round(inputInfo['duration'] / outputInfo['duration'] * 100) != 100:
+        raise EncodingError(f'Output file "{outputPath}" has incorrect duration ({inputInfo["duration"]} vs {outputInfo["duration"]})!')
 
 def StripTS(videoPath, outputPath=None, audioLanguages=None, nomap=False, quiet=False):
     videoPath = Path(videoPath)
@@ -233,6 +239,7 @@ def EncodeTS(videoPath, preset, cropdetect, encoder, crf, outputPath=None, notag
         pbar.update(duration - pbar.n)
     pipeObj.wait()
     shutil.copystat(videoPath, outputPath)
+    CheckEncodingOutput(info, outputPath)
     return outputPath
 
 if __name__ == "__main__":
