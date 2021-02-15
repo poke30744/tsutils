@@ -68,7 +68,10 @@ def GetInfo(path):
         stderr=subprocess.PIPE,
         universal_newlines=True,
         errors='ignore')
-    info = GetInfoFromLines(pipeObj.stderr, path.suffix)
+    try:
+        info = GetInfoFromLines(pipeObj.stderr, path.suffix)
+    except IndexError:
+        raise InvalidTsFormat(f'"{path.name}" is invalid!')
     pipeObj.wait()
     if info is None:
         raise InvalidTsFormat(f'"{path.name}" is invalid!')
