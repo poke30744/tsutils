@@ -114,8 +114,10 @@ def ExtractStream(path, output=None, ss=0, to=999999, videoTracks=None, audioTra
     info = GetInfoFromLines(pipeObj.stderr)
     if info is None:
         raise InvalidTsFormat(f'"{path.name}" is invalid!')
-    total = info['duration'] if info['duration'] < to else to
-    with tqdm(total=total, unit='secs', disable=quiet) as pbar:
+   
+    if to > info['duration']:
+        to = info['duration']
+    with tqdm(total=to - ss, unit='secs', disable=quiet) as pbar:
         pbar.set_description('Extracting streams')
         for line in pipeObj.stderr:
             if 'time=' in line:
@@ -124,7 +126,7 @@ def ExtractStream(path, output=None, ss=0, to=999999, videoTracks=None, audioTra
                         timeFields = item.replace('time=', '').split(':')
                         time = float(timeFields[0]) * 3600 + float(timeFields[1]) * 60  + float(timeFields[2])
                         pbar.update(time - pbar.n)
-        pbar.update(total - pbar.n)
+        pbar.update(to - ss - pbar.n)
     pipeObj.wait()
     return output
 
@@ -228,8 +230,9 @@ def ExtractArea(path, area, folder, ss, to, fps='1/1', quiet=False):
         '-filter:v', 'crop={}:{}:{}:{}{}'.format(w, h, x, y, fpsStr),
         '{}/out%8d.bmp'.format(folder) ]
     pipeObj = subprocess.Popen(args, stderr=subprocess.PIPE, universal_newlines='\r', errors='ignore')
-    total = info['duration'] if info['duration'] < to else to
-    with tqdm(total=total, disable=quiet, unit='secs') as pbar:
+    if to > info['duration']:
+        to = info['duration']
+    with tqdm(total=to - ss, disable=quiet, unit='secs') as pbar:
         pbar.set_description('Extracting area')
         for line in pipeObj.stderr:
             if 'time=' in line:
@@ -238,7 +241,7 @@ def ExtractArea(path, area, folder, ss, to, fps='1/1', quiet=False):
                         timeFields = item.replace('time=', '').split(':')
                         time = float(timeFields[0]) * 3600 + float(timeFields[1]) * 60  + float(timeFields[2])
                         pbar.update(time - pbar.n)
-        pbar.update(total - pbar.n)
+        pbar.update(to - ss - pbar.n)
     pipeObj.wait()
 
 if __name__ == "__main__":
