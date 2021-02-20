@@ -193,6 +193,9 @@ def ExtractFrameProps(path, ss, to, nosad=False):
             originalSize = Image.open(pathList[0]).size
             sadSize = round(originalSize[1] / 8), round(originalSize[0] / 8)
             imageList = [ np.array(Image.open(path).resize(sadSize, Image.NEAREST)) / 255.0 for path in pathList ]
+            # The clip is corrputed if we cannot extract the same number of images
+            if len(imageList) != len(propList):
+                return []
         else:
             imageList = []
     for i, image in enumerate(imageList):
