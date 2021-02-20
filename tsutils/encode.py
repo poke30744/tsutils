@@ -84,7 +84,7 @@ def CheckEncodingOutput(inputInfo, outputPath):
     if round(inputInfo['duration'] / outputInfo['duration'] * 100) != 100:
         raise EncodingError(f'Output file "{outputPath}" has incorrect duration ({inputInfo["duration"]} vs {outputInfo["duration"]})!')
 
-def StripTS(videoPath, outputPath=None, audioLanguages=None, nomap=False, quiet=False):
+def StripTS(videoPath, outputPath=None, audioLanguages=None, fixAudio=False, nomap=False, quiet=False):
     videoPath = Path(videoPath)
     outputPath = Path(outputPath) if outputPath else videoPath.with_name(videoPath.name.replace('.ts', '_stripped.ts'))
     if outputPath.exists() and videoPath.stat().st_mtime == outputPath.stat().st_mtime:
@@ -97,10 +97,15 @@ def StripTS(videoPath, outputPath=None, audioLanguages=None, nomap=False, quiet=
     args = [
         'ffmpeg', '-hide_banner', '-y',
         '-i', str(videoPath),
-        '-c:v', 'copy',
-        '-af',  'aresample=async=1',
-        '-c:a', 'aac',
+        '-c:v', 'copy'
     ]
+    if fixAudio:
+        args += [ 
+            '-af',  'aresample=async=1',
+            '-c:a', 'aac'
+        ]
+    else:
+        args += [ '-c:a', 'copy' ]
     if not nomap:
         args += [ '-map', '0:v', '-map', '0:a', '-ignore_unknown' ]
         for i in range(soundTracks):
@@ -111,6 +116,8 @@ def StripTS(videoPath, outputPath=None, audioLanguages=None, nomap=False, quiet=
     with tqdm(total=duration, unit='secs', disable=quiet) as pbar:
         pbar.set_description('StripTS')
         for line in pipeObj.stderr:
+            if 'Conversion failed!' in line:
+                raise EncodingError(f'Failed in encoding "{videoPath}"!')
             output.append(line)
             if 'time=' in line:
                 for item in line.split(' '):
@@ -159,6 +166,8 @@ def StripAndRepackTS(videoPath, outputPath=None, audioLanguages=None, quiet=Fals
     with tqdm(total=duration, unit='secs', disable=quiet) as pbar:
         pbar.set_description('StripTS2')
         for line in pipeObj.stderr:
+            if 'Conversion failed!' in line:
+                raise EncodingError(f'Failed in encoding "{videoPath}"!')
             output.append(line)
             if 'time=' in line:
                 for item in line.split(' '):
@@ -230,6 +239,8 @@ def EncodeTS(videoPath, preset, cropdetect, encoder, crf, outputPath=None, notag
     with tqdm(total=duration, unit='secs', disable=quiet) as pbar:
         pbar.set_description('Encoding')
         for line in pipeObj.stderr:
+            if 'Conversion failed!' in line:
+                raise EncodingError(f'Failed in encoding "{videoPath}"!')
             if 'time=' in line:
                 for item in line.split(' '):
                     if item.startswith('time='):
