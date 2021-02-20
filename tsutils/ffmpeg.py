@@ -190,6 +190,9 @@ def ExtractFrameProps(path, ss, to, nosad=False):
             pbar.update(to - ss - pbar.n)
         if not nosad:
             pathList = sorted(list(Path(tmpLogoFolder).glob('*.bmp')))
+             # The clip is corrputed if we cannot extract any image
+            if len(pathList) == 0:
+                return []
             originalSize = Image.open(pathList[0]).size
             sadSize = round(originalSize[1] / 8), round(originalSize[0] / 8)
             imageList = [ np.array(Image.open(path).resize(sadSize, Image.NEAREST)) / 255.0 for path in pathList ]
