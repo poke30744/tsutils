@@ -22,12 +22,15 @@ def Split(videoPath):
 
 def Trim(videoPath, outputPath=None):
     splittedTs = Split(videoPath)
-    if splittedTs[0].stat().st_size < TRIM_THRESHOLD:
-        splittedTs[0].unlink()
-        del splittedTs[0]
-    if splittedTs[-1].stat().st_size < TRIM_THRESHOLD:
-        splittedTs[-1].unlink()
-        del splittedTs[-1]
+    while True:
+        if splittedTs[0].stat().st_size < TRIM_THRESHOLD:
+            splittedTs[0].unlink()
+            del splittedTs[0]
+        elif splittedTs[-1].stat().st_size < TRIM_THRESHOLD:
+            splittedTs[-1].unlink()
+            del splittedTs[-1]
+        else:
+            break
     outputPath = Path(outputPath) if outputPath is not None else Path(str(videoPath).replace('.ts', '_trimmed.ts'))
     with outputPath.open('wb') as wf:
         for path in splittedTs:
