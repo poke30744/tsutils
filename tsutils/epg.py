@@ -31,12 +31,12 @@ def Dump(videoPath, quiet=False):
             name = item.get('name')
             if name:
                 name = unicodedata.normalize('NFKC', name)
+                name = name.replace(chr(8217), "'")
                 videoName = unicodedata.normalize('NFKC', videoPath.stem)
                 if name in videoName or re.sub(r"\[.*?\]", "", name) in videoName:
                     for k in item:
                         info[k] = item[k]
     if info == {}:
-        epgPath.unlink()
         raise InvalidTsFormat(f'"{videoPath.name}" is invalid!')
     with txtPath.open('w', encoding='utf8') as f:
         print(info['name'], file=f)
