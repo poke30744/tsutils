@@ -229,6 +229,7 @@ def EncodeTS(videoPath, preset, cropdetect, encoder, crf, outputPath=None, notag
     ] + videoCodec + [
         #https://stackoverflow.com/questions/49686244/ffmpeg-too-many-packets-buffered-for-output-stream-01
         #'-max_muxing_queue_size', '1024',
+        # TODO: support opt-in encoding audio
         '-c:a', 'copy', '-bsf:a', 'aac_adtstoasc',
         '-map', '0:v', '-map', '0:a', '-ignore_unknown',
         str(outputPath)
